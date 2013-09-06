@@ -1,0 +1,64 @@
+#! /bin/bash
+# Wrapper for 'nova' script to manage OpenStack Cloud Computing: Specifically prompting user before executing shutdown command.
+# For more on nova: http://docs.openstack.org/developer/nova/
+# v 1.1 | git.sbamin.com
+
+if [ "$1" == "-h" ] || [ "$1" == "--h" ] || [ "$#" -lt 1 ]; then
+	echo "Usage: `basename $0` arg1 arg2"
+	echo "Example: nov stop venus"
+	echo "Available VMs: mercury,venus,earth,mars"
+	/usr/bin/nova -help
+	exit 0
+elif [ "$1" == "stop" ]; then
+	if [ "$#" -lt 2 ]; then
+		echo "Missing second argument: Provide name of VM that needs to be stopped."
+		echo "Example: nov stop venus"
+		echo "Available VMs: mercury,venus,earth,mars"
+		exit 0
+	elif [ "$2" == "sun" ]; then	
+		echo "sun is a head node, can not be shutdown"
+		echo "Available VMs: mercury,venus,earth,mars"
+		exit 0
+	else
+	VMSTATUS=$(/usr/bin/nova list | grep "$2" | awk '{print $6}')
+		if [ "$VMSTATUS" != "ACTIVE" ]; then
+			echo ""$2" is not in ACTIVE mode, can not execute nov "$*""
+			echo "Also, please make sure to not capitalize any letter of arguments"
+			echo "Available VMs: mercury,venus,earth,mars"	
+			exit 0
+		else	
+	echo "Please make sure no other user has running jobs on "$2""
+	echo $'\r'
+	echo "*********************************************************"
+	echo "CURRENT uptime STATUS FOR "$2" is:"
+	ssh -t "$2" "/usr/bin/uptime"
+	sleep 3
+	echo "*********************************************************"
+	echo $'\r'
+	echo "LAST USER LOGIN:"
+	last | head
+	sleep 3
+	echo "*********************************************************"
+	echo $'\r'
+	echo "CURRENT JOB STATUS FOR "$2" is:"
+	ssh -t "$2" "/usr/bin/top -b -d1 -n1 | head -n20"
+	echo "*********************************************************"
+	echo $'\r'
+	echo "PLEASE REVIEW LOGS ABOVE BEFORE SHUTTING DOWN VM"
+	/bin/sleep 2
+	read -p "ARE YOU SURE TO CONTINUE SHUTDOWN "$2": (Y/n)?" CHOICE
+		case "$CHOICE" in 
+			Y ) echo "OK! Shutting down "$2" `/usr/bin/nova stop "$2"`";;
+			n|N ) echo "Aborting shutdown `exit 0`";;
+			* ) echo "invalid response. It should be Y or n/N";;
+		esac
+		fi
+	fi
+elif [ "$1" == "suspend" ] || [ "$1" == "reboot" ] || [ "$1" == "pause" ] || [ "$1" == "rebuild" ]; then
+	echo "UNSAFE COMMAND: Please use nov stop <VM>"
+	echo "Example: nov stop venus"
+	echo "Available VMs: mercury,venus,earth,mars"
+	exit 0
+else
+	/usr/bin/nova $*
+fi

@@ -1,18 +1,18 @@
 #! /bin/bash
 # Wrapper for 'nova' script to manage OpenStack Cloud Computing: Specifically prompting user before executing shutdown command.
 # For more on nova: http://docs.openstack.org/developer/nova/
-# v 1.1 | git.sbamin.com
+# v 1.2 | git.sbamin.com
 
 if [ "$1" == "-h" ] || [ "$1" == "--h" ] || [ "$#" -lt 1 ]; then
 	echo "Usage: `basename $0` arg1 arg2"
-	echo "Example: nov stop venus"
+	echo "Example: `basename $0` stop venus"
 	echo "Available VMs: mercury,venus,earth,mars"
 	/usr/bin/nova -help
 	exit 0
 elif [ "$1" == "stop" ]; then
 	if [ "$#" -lt 2 ]; then
 		echo "Missing second argument: Provide name of VM that needs to be stopped."
-		echo "Example: nov stop venus"
+		echo "Example: `basename $0` stop venus"
 		echo "Available VMs: mercury,venus,earth,mars"
 		exit 0
 	elif [ "$2" == "sun" ]; then	
@@ -22,7 +22,7 @@ elif [ "$1" == "stop" ]; then
 	else
 	VMSTATUS=$(/usr/bin/nova list | grep "$2" | awk '{print $6}')
 		if [ "$VMSTATUS" != "ACTIVE" ]; then
-			echo ""$2" is not in ACTIVE mode, can not execute nov "$*""
+			echo ""$2" is not in ACTIVE mode, can not execute `basename $0` "$*""
 			echo "Also, please make sure to not capitalize any letter of arguments"
 			echo "Available VMs: mercury,venus,earth,mars"	
 			exit 0
@@ -50,13 +50,13 @@ elif [ "$1" == "stop" ]; then
 		case "$CHOICE" in 
 			Y ) echo "OK! Shutting down "$2" `/usr/bin/nova stop "$2"`";;
 			n|N ) echo "Aborting shutdown `exit 0`";;
-			* ) echo "invalid response. It should be Y or n/N";;
+			* ) echo "invalid response. It should be Y (case sensitive) or n/N";;
 		esac
 		fi
 	fi
-elif [ "$1" == "suspend" ] || [ "$1" == "reboot" ] || [ "$1" == "pause" ] || [ "$1" == "rebuild" ]; then
-	echo "UNSAFE COMMAND: Please use nov stop <VM>"
-	echo "Example: nov stop venus"
+elif [ "$1" == "suspend" ] || [ "$1" == "reboot" ] || [ "$1" == "pause" ] || [ "$1" == "rebuild" ] || [ "$1" == "lock" ]; then
+	echo "UNSAFE COMMAND: Please use `basename $0` stop <VM>"
+	echo "Example: `basename $0` stop venus"
 	echo "Available VMs: mercury,venus,earth,mars"
 	exit 0
 else

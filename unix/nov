@@ -1,7 +1,7 @@
 #! /bin/bash
 # Wrapper for 'nova' script to manage OpenStack Cloud Computing: Specifically prompting user before executing shutdown command.
 # For more on nova: http://docs.openstack.org/developer/nova/
-# v 1.2 | git.sbamin.com
+# v 1.2.1 | git.sbamin.com
 
 if [ "$1" == "-h" ] || [ "$1" == "--h" ] || [ "$#" -lt 1 ]; then
 	echo "Usage: `basename $0` arg1 arg2"
@@ -46,11 +46,11 @@ elif [ "$1" == "stop" ]; then
 	echo $'\r'
 	echo "PLEASE REVIEW LOGS ABOVE BEFORE SHUTTING DOWN VM"
 	/bin/sleep 2
-	read -p "ARE YOU SURE TO CONTINUE SHUTDOWN "$2": (Y/n)?" CHOICE
+	read -t 30 -p "ARE YOU SURE TO CONTINUE SHUTDOWN "$2": (Y/n)?" CHOICE
 		case "$CHOICE" in 
 			Y ) echo "OK! Shutting down "$2" `/usr/bin/nova stop "$2"`";;
 			n|N ) echo "Aborting shutdown `exit 0`";;
-			* ) echo "invalid response. It should be Y (case sensitive) or n/N";;
+			* ) echo " Invalid response or timeout. It should be Y (case sensitive) or n/N";;
 		esac
 		fi
 	fi

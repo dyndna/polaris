@@ -12,5 +12,6 @@
 2. `/R/bulk_install_packages.R`: Install R packages in bulk - Useful when migrating to R 3.0 from R 2.0.\*.
 3. `/unix/nov`: Wrapper for nova openstack command line interface to manage cloud computing.
 4. `/unix/remote_shutdown.sh`: Conditional remote system shutdown using dropbox and cron job.
+5. `/unix/samtools-extract-reads`: Extract reads from bam file which matches regions in bed file.
 
 ---

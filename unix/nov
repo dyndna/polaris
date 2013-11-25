@@ -1,7 +1,8 @@
 #! /bin/bash
 # Wrapper for 'nova' script to manage OpenStack Cloud Computing: Specifically prompting user before executing shutdown command.
+# To prevent accidental system shutdown, make "lockfile_<VM_ID>" at bastion PATH, /home/ and make it readable for all users.
 # For more on nova: http://docs.openstack.org/developer/nova/
-# v 1.2.1 | git.sbamin.com
+# v 1.2.2 | git.sbamin.com
 
 if [ "$1" == "-h" ] || [ "$1" == "--h" ] || [ "$#" -lt 1 ]; then
 	echo "Usage: `basename $0` arg1 arg2"
@@ -21,10 +22,18 @@ elif [ "$1" == "stop" ]; then
 		exit 0
 	else
 	VMSTATUS=$(/usr/bin/nova list | grep "$2" | awk '{print $6}')
+	LOCKFILE="/home/lockfile_"$2""
 		if [ "$VMSTATUS" != "ACTIVE" ]; then
 			echo ""$2" is not in ACTIVE mode, can not execute `basename $0` "$*""
 			echo "Also, please make sure to not capitalize any letter of arguments"
 			echo "Available VMs: mercury,venus,earth,mars"	
+			exit 0
+		elif [ -e "$LOCKFILE" ]; then
+			LOCKOWN=$(ls -l "$LOCKFILE" | awk '{print $3}')
+			echo "user defined lockfile exists at "$LOCKFILE""
+			echo "DO NOT POWER OFF "$2", "$LOCKOWN" is running job(s) on "$2""
+			echo "LAST USER LOGIN AT "$2":"
+			ssh -t "$2" "last | head"
 			exit 0
 		else	
 	echo "Please make sure no other user has running jobs on "$2""
@@ -36,7 +45,7 @@ elif [ "$1" == "stop" ]; then
 	echo "*********************************************************"
 	echo $'\r'
 	echo "LAST USER LOGIN:"
-	last | head
+	ssh -t "$2" "last | head"
 	sleep 3
 	echo "*********************************************************"
 	echo $'\r'
